@@ -1,0 +1,325 @@
+====================================================================================================
+                 ENTERPRISE SOC INDICATOR ECOSYSTEM (DETECTION + HUNTING + INTEL)
+====================================================================================================
+
+INDICATORS (ALL TYPES)
+│
+├── 1. IOC (Indicators of Compromise)  [POST-COMPROMISE FORENSICS]
+│   │
+│   ├── 1.1 FILE / ARTIFACT IOC
+│   │   │
+│   │   ├── Cryptographic Hashes
+│   │   │   ├── MD5 (legacy, collision-prone)
+│   │   │   ├── SHA1 (deprecated)
+│   │   │   └── SHA256 (industry standard)
+│   │   │
+│   │   ├── File Metadata
+│   │   │   ├── File Name (e.g., svchost.exe spoof)
+│   │   │   ├── File Path (C:\Users\Public\temp.exe)
+│   │   │   ├── File Size anomalies
+│   │   │   ├── Compile Timestamp (PE header)
+│   │   │   └── Digital Signature (valid/invalid/spoofed)
+│   │   │
+│   │   ├── File Behavior Indicators
+│   │   │   ├── Packed/Obfuscated binaries
+│   │   │   ├── Self-modifying code
+│   │   │   └── Dropper artifacts
+│   │   │
+│   │   └── Malware-Specific Artifacts
+│   │       ├── Mutex names
+│   │       ├── Hardcoded strings
+│   │       └── Embedded configs
+│   │
+│   ├── 1.2 HOST-BASED IOC
+│   │   │
+│   │   ├── Process Indicators
+│   │   │   ├── Suspicious parent-child chain
+│   │   │   │   (e.g., winword.exe → powershell.exe → cmd.exe)
+│   │   │   ├── Unusual command-line arguments
+│   │   │   └── Privilege escalation tokens
+│   │   │
+│   │   ├── Persistence Indicators
+│   │   │   ├── Registry Run Keys
+│   │   │   ├── Scheduled Tasks
+│   │   │   ├── Startup folders
+│   │   │   └── WMI Event Subscriptions
+│   │   │
+│   │   ├── Registry Indicators
+│   │   │   ├── Autorun entries
+│   │   │   ├── IFEO hijacking
+│   │   │   └── COM hijacking keys
+│   │   │
+│   │   ├── Memory Indicators
+│   │   │   ├── Process Injection (DLL, PE injection)
+│   │   │   ├── Reflective DLL loading
+│   │   │   ├── Shellcode presence
+│   │   │   └── RWX memory regions
+│   │   │
+│   │   └── Log-based Evidence
+│   │       ├── Windows Event Logs (4624, 4688, 7045)
+│   │       ├── Sysmon Events (1, 3, 7, 10)
+│   │       └── Audit Logs (Linux auth.log, bash history)
+│   │
+│   ├── 1.3 NETWORK IOC
+│   │   │
+│   │   ├── Layer 3 Indicators
+│   │   │   ├── Malicious IP (C2, botnet)
+│   │   │   └── Geo-IP anomalies
+│   │   │
+│   │   ├── Layer 4 Indicators
+│   │   │   ├── Suspicious ports (4444, 1337)
+│   │   │   └── Unusual connection patterns
+│   │   │
+│   │   ├── Layer 7 Indicators
+│   │   │   ├── HTTP User-Agent anomalies
+│   │   │   ├── Malicious URLs
+│   │   │   ├── DNS tunneling domains
+│   │   │   └── TLS fingerprint (JA3/JA3S)
+│   │   │
+│   │   └── Traffic Patterns
+│   │       ├── Beaconing intervals
+│   │       ├── Data exfil bursts
+│   │       └── Encrypted payload anomalies
+│   │
+│   └── 1.4 EMAIL IOC
+│       ├── Sender spoofing
+│       ├── DKIM/SPF failures
+│       ├── Malicious attachments
+│       └── Phishing URLs
+│
+├── 2. IOA (Indicators of Attack)  [REAL-TIME DETECTION]
+│   │
+│   ├── Execution Behavior
+│   │   ├── PowerShell encoded commands
+│   │   ├── Living-off-the-Land (LOLbins)
+│   │   │   ├── certutil.exe
+│   │   │   ├── mshta.exe
+│   │   │   └── rundll32.exe
+│   │
+│   ├── Privilege Escalation
+│   │   ├── Token manipulation
+│   │   ├── UAC bypass techniques
+│   │   └── Exploit execution patterns
+│   │
+│   ├── Lateral Movement
+│   │   ├── Pass-the-Hash
+│   │   ├── SMB/WMI remote execution
+│   │   └── RDP anomalies
+│   │
+│   ├── Credential Access
+│   │   ├── LSASS memory dump
+│   │   ├── Keylogging behavior
+│   │   └── Credential harvesting tools
+│   │
+│   └── Data Exfiltration
+│       ├── DNS exfiltration
+│       ├── Cloud upload spikes
+│       └── Steganography channels
+│
+├── 3. IOB (Indicators of Behavior)  [UEBA / ANOMALY DETECTION]
+│   │
+│   ├── User Behavior
+│   │   ├── Impossible travel (India → US in 5 min)
+│   │   ├── Login time deviation
+│   │   ├── Privilege misuse
+│   │   └── Data access anomalies
+│   │
+│   ├── Entity Behavior
+│   │   ├── Service account misuse
+│   │   ├── API abuse
+│   │   └── Machine identity anomalies
+│   │
+│   └── Network Behavior
+│       ├── Beaconing detection (periodicity)
+│       ├── East-West traffic anomalies
+│       └── Protocol abuse (DNS, ICMP)
+│
+├── 4. IOI (Indicators of Intent)  [THREAT INTELLIGENCE]
+│   │
+│   ├── Reconnaissance Indicators
+│   │   ├── Mass scanning (Nmap, Shodan)
+│   │   ├── Banner grabbing
+│   │   └── Enumeration attempts
+│   │
+│   ├── Adversary Preparation
+│   │   ├── Domain typosquatting
+│   │   ├── SSL cert registration
+│   │   └── Infrastructure setup
+│   │
+│   ├── Dark Web Intelligence
+│   │   ├── Data leak mentions
+│   │   ├── Credential dumps
+│   │   └── Ransomware listings
+│   │
+│   └── Social Engineering Prep
+│       ├── Phishing kit deployment
+│       ├── Email spoofing infra
+│       └── Fake login portals
+│
+├── 5. TTP INDICATORS (ATTACKER DNA)
+│   │
+│   ├── Tactics (WHY)
+│   │   ├── Initial Access
+│   │   ├── Persistence
+│   │   ├── Defense Evasion
+│   │   └── Exfiltration
+│   │
+│   ├── Techniques (HOW)
+│   │   ├── DLL Injection
+│   │   ├── Credential Dumping
+│   │   └── Command Execution
+│   │
+│   └── Procedures (IMPLEMENTATION)
+│       ├── Specific malware workflow
+│       ├── Attack chain sequence
+│       └── Tool usage pattern
+│
+├── 6. IOD (Indicators of Detection)
+│   │
+│   ├── SIEM Alerts (Correlation rules)
+│   ├── EDR Alerts (behavior engine)
+│   ├── IDS/IPS Signatures
+│   ├── SOAR playbook triggers
+│   └── Threat intel matches
+│
+├── 7. IOR (Indicators of Risk)
+│   │
+│   ├── Vulnerability Risk
+│   │   ├── CVSS Score
+│   │   ├── Exploit availability
+│   │   └── Patch status
+│   │
+│   ├── Asset Risk
+│   │   ├── Business criticality
+│   │   ├── Data sensitivity
+│   │   └── Exposure surface
+│   │
+│   └── Threat Risk
+│       ├── Threat actor capability
+│       ├── Attack likelihood
+│       └── Impact severity
+│
+├── 8. IOE (Indicators of Exposure)
+│   │
+│   ├── Misconfigurations
+│   │   ├── Open S3 buckets
+│   │   ├── Public DB access
+│   │   └── Default credentials
+│   │
+│   ├── Network Exposure
+│   │   ├── Open ports
+│   │   ├── Weak firewall rules
+│   │   └── VPN misconfigurations
+│   │
+│   └── Identity Exposure
+│       ├── Weak passwords
+│       ├── No MFA
+│       └── Credential reuse
+│
+├── 9. IOF (Indicators of Fraud)
+│   │
+│   ├── Transaction anomalies
+│   ├── Account takeover signals
+│   ├── Behavioral biometrics deviation
+│   └── Payment fraud patterns
+│
+├── 10. INDICATORS BY DATA SOURCE
+│   │
+│   ├── Endpoint (EDR, Sysmon)
+│   ├── Network (NetFlow, PCAP)
+│   ├── Cloud (AWS CloudTrail, Azure Logs)
+│   ├── Identity (AD, Okta logs)
+│   └── Application (Web logs, API logs)
+│
+├── 11. INDICATORS BY DETECTION METHOD
+│   │
+│   ├── Signature-based (IOC match)
+│   ├── Behavioral-based (IOA/IOB)
+│   ├── Heuristic-based
+│   ├── Statistical anomaly detection
+│   └── Machine Learning models
+│
+├── 12. KILL CHAIN INDICATORS (ATTACK LIFECYCLE)
+│   │
+│   ├── Recon → IOI
+│   ├── Delivery → Email IOC
+│   ├── Exploitation → IOA
+│   ├── Installation → IOC
+│   ├── C2 → Network IOC
+│   └── Exfiltration → IOA/IOB
+│
+└── 13. NEXT-GEN SOC INDICATORS
+    │
+    ├── UEBA risk scores
+	
+	
+    ├── Deception signals (honeypots triggered)
+    ├── Threat hunting hypotheses
+    ├── Zero-day behavior patterns
+    └── AI-driven anomaly clusters
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	🧠 FIELD-LEVEL DETECTION EXAMPLES (REAL SOC)
+================================================================================
+INDICATOR TYPE → REAL DETECTION USE CASE
+================================================================================
+
+IOC  → SHA256 hash match in VirusTotal → Malware confirmed
+IOA  → powershell.exe -enc → Suspicious encoded execution
+IOB  → User logs in at 3 AM from new country → UEBA alert
+IOI  → Domain similar to company registered → Phishing prep
+TTP  → LSASS dump → Credential Access (MITRE T1003)
+IOD  → SIEM rule triggered (5 failed logins + success)
+IOR  → Critical server + high CVSS vuln → High risk alert
+IOE  → Public S3 bucket → Data exposure risk
+IOF  → Multiple rapid transactions → Fraud detection
+================================================================================
+🔥 DETECTION ENGINEERING MAPPING (VERY IMPORTANT)
+================================================================================
+INDICATOR → USED IN → TOOL
+================================================================================
+
+IOC  → Signature Detection → SIEM / Antivirus / IDS
+IOA  → Behavior Detection → EDR / XDR
+IOB  → UEBA → Splunk UEBA / Exabeam
+IOI  → Threat Intel → MISP / Recorded Future
+TTP  → Threat Hunting → MITRE ATT&CK / Sigma Rules
+IOD  → Alerting → SIEM (Splunk, QRadar)
+IOR  → Risk Scoring → GRC / Risk Engines
+IOE  → Exposure Mgmt → Nessus / Qualys
+IOF  → Fraud Systems → Banking SIEM / AI engines
+================================================================================
+🚀 ADVANCED INSIGHT (EXPERT LEVEL)
+================================================================================
+LEVEL 1 SOC → Uses IOC (basic detection)
+LEVEL 2 SOC → Uses IOA + correlation
+LEVEL 3 SOC → Uses TTP + threat hunting
+ADVANCED SOC → Uses AI + UEBA + IOI
+
+BEST PRACTICE:
+→ Combine IOC + IOA + TTP = STRONG DETECTION
+→ IOC alone = easily bypassed
+================================================================================
+🧩 FINAL MENTAL MODEL (REMEMBER THIS)
+================================================================================
+BEFORE ATTACK  → IOI (Intent)
+DURING ATTACK  → IOA (Behavior)
+AFTER ATTACK   → IOC (Evidence)
+
+UNDERSTANDING  → TTP (Attacker logic)
+DETECTION      → IOD (Alerts)
+PRIORITY       → IOR (Risk)
+WEAKNESS       → IOE (Exposure)
+================================================================================
+
+====================================================================================================
+	
+	
