@@ -1,0 +1,428 @@
+
+🔐 1. Ethical Hacking Lifecycle
+Ethical hacking follows a systematic process to identify and fix vulnerabilities.
+
+Phases:
+
+1. Reconnaissance (Information Gathering)
+• Collect target information
+• Types:
+◇ Passive (no direct interaction)
+◇ Active (direct probing)
+
+2. Scanning
+◇ Identify live systems, ports, services
+◇ Tools: Nmap, Hping , nessus
+
+3. Gaining Access (Exploitation)
+◇ Exploit vulnerabilities
+◇ Example: SQL Injection, buffer overflow
+
+
+4. Maintaining Access
+◇ Install backdoors, persistence
+◇ Example: Trojans, rootkits
+
+
+5. Covering Tracks
+◇ Delete logs, hide activity
+
+
+🧑‍💻 2. Types of Hackers
+
+1. White Hat (Ethical Hackers)
+◇ Work legally to secure systems
+
+2. Black Hat
+◇ Malicious attackers
+
+3. Grey Hat
+◇ Between legal and illegal
+
+4. Script Kiddies
+◇ Use pre-built tools
+
+5. Hacktivists
+◇ Political/social motives
+
+6. State-Sponsored Hackers
+◇ Government-backed
+
+7. Insider Threats
+◇ Employees misusing access
+
+
+🌐 3. Reconnaissance & Scanning
+
+Reconnaissance Techniques:
+◇ WHOIS lookup
+◇ DNS enumeration
+◇ Social engineering
+◇ Google dorking
+
+Scanning Types:
+◇ Network scanning
+◇ Port scanning
+◇ Vulnerability scanning
+
+Tools:
+◇ Nmap
+◇ Netcat
+◇ Wireshark
+
+
+🔍 4. Vulnerability Assessment Basics
+
+Definition:
+Process of identifying, classifying, and prioritizing vulnerabilities.
+
+Types:
+◇ Network-based
+◇ Host-based
+◇ Application-based
+◇ Wireless
+
+
+Steps:
+1. Identify assets
+2. Scan vulnerabilities
+3. Analyze risk
+4. Report findings
+
+Tools:
+
+◇ Nessus
+◇ OpenVAS
+
+
+⚔️ 5. Penetration Testing Overview
+
+Definition:
+Simulated attack to exploit vulnerabilities.
+
+Types:
+◇ Black Box (no info)
+◇ White Box (full info)
+◇ Grey Box (partial info)
+
+
+Phases:
+   1) Planning
+2. Reconnaissance
+3. Exploitation
+4. Post-exploitation
+5. Reporting
+
+🔟 6. OWASP Top 10
+From OWASP
+
+Common Risks:
+1. Broken Access Control
+2. Cryptographic Failures
+3. Injection (SQL, OS, etc.)
+4. Insecure Design
+5. Security Misconfiguration
+6. Vulnerable Components
+7. Authentication Failures
+8. Data Integrity Failures
+9. Logging & Monitoring Failures
+10. SSRF (Server-Side Request Forgery)
+
+🌍 7. Web Application Security Basics
+
+Key Concepts:
+◇ Client-server model
+◇ HTTP/HTTPS protocols
+◇ Cookies & sessions
+
+
+Security Goals:
+◇ Confidentiality
+◇ Integrity
+◇ Availability (CIA Triad)
+
+
+🐞 8. Web & API Vulnerabilities
+
+Web Vulnerabilities:
+◇ SQL Injection
+◇ Cross-Site Scripting (XSS)
+◇ Cross-Site Request Forgery (CSRF)
+◇ File Upload vulnerabilities
+
+
+API Vulnerabilities:
+◇ Broken Authentication
+◇ Rate limiting issues
+◇ Insecure endpoints
+◇ Data exposure (JSON leaks)
+
+
+🏚️ 9. Legacy Systems & Exposed Services
+
+Legacy Systems:
+◇ Outdated OS/software
+◇ No patches or support
+
+
+Risks:
+◇ Known vulnerabilities
+◇ Weak encryption
+
+
+Exposed Services:
+◇ Open ports (FTP, Telnet, SMB)
+◇ Misconfigured servers
+
+
+☁️ 10. Cloud Apps & Misconfigurations
+
+Cloud Platforms:
+◇ AWS, Azure, GCP
+
+
+Common Issues:
+◇ Public S3 buckets
+◇ Weak IAM policies
+◇ Open security groups
+◇ Improper API permissions
+
+
+Risks:
+◇ Data leaks
+◇ Unauthorized access
+
+=============================================================
+Nessus
+
+🔍 Nessus Tool – Full Theory (Vulnerability Scanner)
+
+🧠 1. What is Nessus?
+Nessus is a popular vulnerability assessment tool developed by Tenable.
+It is used to:
+• Identify security vulnerabilities
+• Detect misconfigurations
+• Find outdated software
+• Check compliance issues
+
+👉 In simple words:
+ Nessus scans systems and tells you “where you are weak” before hackers find it.
+
+🎯 2. Purpose of Nessus
+◇ Vulnerability Assessment (VA)
+◇ Risk management
+◇ Compliance auditing (PCI-DSS, ISO, etc.)
+◇ Patch verification
+◇ Network security auditing
+
+
+🔄 3. How Nessus Works (Architecture)
+
+Components:
+1. Nessus Server
+◇ Runs scans
+◇ Stores results
+
+• Nessus Client (Web Interface)
+◇ Browser-based dashboard (https://localhost:8834)
+
+• Plugins
+◇ Core of Nessus (like scripts)
+◇ Each plugin checks a specific vulnerability
+
+
+⚙️ 4. Types of Scans in Nessus
+
+🔹 Host Discovery Scan
+ ◇ Finds live systems in network
+
+
+🔹 2. Basic Network Scan
+◇ Default scan
+◇ Detects open ports, services, vulnerabilities
+
+🔹 3. Advanced Scan
+◇ Custom scan settings (ports, plugins, timing)
+
+🔹 4. Credentialed Scan
+◇ Uses login (SSH/Windows creds)
+◇ Deep scan (very accurate)
+
+🔹 5. Web Application Scan
+◇ Checks websites for vulnerabilities
+
+🔍 5. Nessus Scan Phases
+1. Target Identification
+2. Port Scanning
+3. Service Detection
+4. Vulnerability Detection (via plugins)
+5. Report Generation
+
+🧪 6. Types of Vulnerabilities Detected
+◇ 🔓 Open ports (e.g., 21, 22, 80)
+◇ 🐞 Software bugs
+◇ ⚠️ Misconfigurations
+◇ 🔑 Weak passwords
+◇ 🕳️ Web vulnerabilities (XSS, SQLi)
+◇ 📦 Missing patches
+
+
+🧰 7. Nessus Plugins (Very Important)
+◇ Thousands of plugins
+◇ Written in NASL (Nessus Attack Scripting Language)
+
+
+Plugin categories:
+◇ Windows vulnerabilities
+◇ Linux vulnerabilities
+◇ Databases
+◇ Web servers
+◇ Network devices
+
+👉 Example:
+◇ Plugin checks if Apache version is outdated
+
+
+📊 8. Severity Levels in Nessus
+
+| Severity | Meaning |
+| 🔴 Critical | Immediate threat |
+| 🟠 High | Serious risk |
+| 🟡 Medium | Moderate |
+| 🔵 Low | Minor |
+| ⚪ Info | Informational |
+
+
+
+
+📄 9. Nessus Reports
+After scan, Nessus generates reports:
+
+Includes:
+◇ Vulnerability name
+◇ Description
+◇ Risk level
+◇ CVE ID
+◇ Solution (fix)
+◇ Affected systems
+
+👉 Formats:
+◇ PDF
+◇ HTML
+◇ CSV
+
+
+🔐 10. Credentialed vs Non-Credentialed Scan
+
+🔹 Non-Credentialed
+◇ External scan
+◇ Less accurate
+◇ Like hacker view
+
+
+🔹 Credentialed
+◇ Internal scan
+◇ Uses login access
+◇ Very accurate
+
+
+🌐 11. Nessus vs Other Tools
+
+| Tool | Purpose |
+| Nmap | Port scanning |
+| OpenVAS | Open-source Nessus alternative |
+| Metasploit | Exploitation |
+| Nessus | Vulnerability scanning |
+
+
+
+👉 Nessus = Find weaknesses
+ 👉 Metasploit = Exploit weaknesses
+
+🧱 12. Advantages of Nessus
+◇ Easy GUI (web-based)
+◇ Large plugin database
+◇ Accurate results
+◇ Regular updates
+◇ Fast scanning
+
+
+⚠️ 13. Limitations
+◇ Not fully free (limited free version)
+◇ False positives possible
+◇ Cannot exploit vulnerabilities (only detects)
+
+
+🔑 14. Nessus in Kali Linux
+👉 Important:
+ Nessus is not pre-installed in Kali, you must install manually.
+
+Uses in Kali:
+◇ Scan target machines
+◇ Practice in labs (e.g., vulnerable VMs)
+◇ Pre-pentest assessment
+
+
+🛠️ 15. Real-World Workflow
+1. Run Nessus scan
+2. Identify vulnerabilities
+3. Prioritize critical issues
+4. Use tools like Metasploit to exploit
+5. Patch system
+6. Re-scan
+
+🧠 16. Nessus in Ethical Hacking Lifecycle
+1. Reconnaissance
+2. Scanning → ✅ (Nessus used here)
+3. Enumeration
+4. Exploitation
+5. Post-exploitation
+
+🧾 17. Common Use Cases
+◇ Enterprise security audits
+◇ Bug bounty reconnaissance
+◇ SOC operations
+◇ Compliance checks
+
+
+🧩 18. Key Terms to Remember (Exam Focus)
+◇ CVE (Common Vulnerabilities and Exposures)
+◇ CVSS Score
+◇ Plugin
+◇ Credentialed scan
+◇ False Positive / False Negative
+◇ Patch Management
+
+
+📌 Final Summary
+◇ Nessus = Vulnerability Scanner
+◇ Developed by Tenable
+◇ Uses plugins to detect issues
+◇ Gives severity-based reports
+◇ Used before penetration testing
+
+ Nessus Download link : -https://www.tenable.com/downloads/nessus?loginAttempted=true
+ 
+ 
+ 
+ 
+ 
+ =================================================
+ 
+🧪 Nessus + Metasploitable Live Lab (Full Practical Guide)
+
+🎯 Lab Objective
+• Scan a vulnerable machine
+• Identify vulnerabilities using Nessus
+• Analyze results
+• (Optional) Exploit using Metasploit
+
+
+🖥️ Lab Setup Requirements
+
+🔹 1. Tools Needed
+◇ Kali Linux (Attacker machine)
+◇ Metasploitable 2 (Victim machine)
+◇ VMware / VirtualBox
+
+Solve and read result by your own . 
