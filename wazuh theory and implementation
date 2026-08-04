@@ -1,0 +1,349 @@
+wazuh Theory 
+
+
+What is Wazuh?
+Wazuh is an open-source SIEM and XDR platform used by Security Operations Centers (SOCs) to detect threats, monitor systems, collect logs, and respond to security incidents.
+
+Wazuh Architecture
+1. Wazuh Agent• Installed on endpoints (Windows, Linux, macOS)
+• Collects logs, file integrity data, system events, and security information
+
+
+• Wazuh Server (Manager)◇ Receives data from agents
+◇ Applies detection rules
+◇ Generates alerts
+
+
+• Indexer◇ Stores and indexes security data for fast searching
+• Dashboard◇ Web interface to view alerts, dashboards, and reports
+
+Key Features
+◇ Log collection and analysis
+◇ File Integrity Monitoring (FIM)
+◇ Intrusion Detection (HIDS)
+◇ Malware detection
+◇ Vulnerability detection
+◇ Security Configuration Assessment (SCA)
+◇ Rootkit detection
+◇ Active Response (automatically block malicious activity)
+◇ Compliance monitoring (PCI DSS, HIPAA, GDPR, CIS, NIST)
+
+
+Wazuh in a SOC Workflow
+
+Endpoints
+     │
+     ▼
+Wazuh Agent
+     │
+     ▼
+Wazuh Manager
+     │
+     ▼
+Indexer
+     │
+     ▼
+Dashboard
+     │
+     ▼
+SOC Analyst investigates alerts
+
+Skills a SOC Analyst Should Know in Wazuh
+◇ Installing Wazuh agents
+◇ Monitoring alerts
+◇ Searching logs
+◇ Understanding rules and decoders
+◇ File Integrity Monitoring (FIM)
+◇ Active Response
+◇ Threat Hunting
+◇ MITRE ATT&CK mapping
+◇ Creating custom rules
+◇ Investigating incidents
+
+
+Common Wazuh Alert Types
+◇ Failed login attempts
+◇ Brute-force attacks
+◇ Malware detection
+◇ File modification
+◇ USB device insertion
+◇ Privilege escalation
+◇ Service stopped/started
+◇ New user account created
+◇ Suspicious PowerShell execution
+
+Wazuh is one of the most widely used open-source tools for SOC environments and is commonly used for Blue Team operations, log monitoring, threat detection, and incident response.
+
+
+Practical Wazuh Implementation Example
+Let's implement Wazuh in a small company with 1 Wazuh Server and 3 endpoints.
+
+Scenario
+A company wants to monitor:
+• 1 Windows 11 laptop (HR)
+• 1 Ubuntu Server (Web Server)
+• 1 Kali Linux machine (Testing)
+
+
+                    Internet
+                        |
+                  Firewall/Router
+                        |
+                --------------------
+                |                  |
+        Wazuh Server         Company Network
+        (Ubuntu 22.04)
+                |
+      ------------------------
+      |          |           |
+ Windows 11   Ubuntu      Kali Linux
+   Agent        Agent        Agent
+
+
+
+
+
+Step 1: Install Wazuh Server
+Use Ubuntu 22.04.
+Update packages:
+
+sudo apt update
+sudo apt upgrade -y
+
+
+
+
+Install Wazuh using the official installation script:
+
+
+curl -sO https://packages.wazuh.com/4.8/wazuh-install.sh
+
+sudo bash wazuh-install.sh -a
+
+
+After installation, you'll receive:
+◇ Dashboard URL
+◇ Username
+◇ Password
+
+Example:
+
+https://192.168.1.100
+
+Username:
+admin
+
+Password:
+xxxxxxxx
+
+
+Open the Dashboard in your browser.
+
+Step 2: Login
+Open
+
+https://192.168.1.100
+
+
+Login with:
+
+admin
+password
+
+
+Dashboard appears.
+
+Step 3: Add an Agent
+Go to:
+
+Dashboard
+↓
+Agents
+↓
+Deploy New Agent
+
+
+Choose:
+
+Operating System
+
+Windows
+Linux
+macOS
+
+Example:
+Windows 11
+Enter:
+
+Server IP
+
+192.168.1.100
+
+The dashboard generates the installation command.
+
+Step 4: Install Windows Agent
+Run the generated command (or install the MSI package and register it).
+Start the agent service.
+Verify:
+
+Dashboard
+↓
+Agents
+↓
+Windows-PC
+Status
+Active
+
+Step 5: Install Linux Agent
+Ubuntu:
+
+curl -so wazuh-agent.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_version_amd64.deb
+
+sudo WAZUH_MANAGER='192.168.1.100' dpkg -i wazuh-agent.deb
+
+sudo systemctl enable wazuh-agent
+
+sudo systemctl start wazuh-agent
+
+Step 6: Verify Agents
+Dashboard
+
+Agents
+
+✓ Windows
+
+✓ Ubuntu
+
+✓ Kali
+
+
+All agents should be Active.
+
+Practical Use Cases
+
+1. Failed Login Detection
+Generate failed SSH logins on Ubuntu:
+
+ssh wronguser@ubuntu-server
+
+
+Repeat several times.
+Wazuh alert:
+
+Rule ID: 5710
+
+Multiple authentication failures detected
+
+Level: High
+
+
+
+SOC Analyst Action:
+◇ Check the source IP.
+◇ Determine if it is an internal mistake or an external brute-force attempt.
+◇ Block the IP if malicious.
+
+2. File Integrity Monitoring (FIM)
+Modify a monitored file:
+
+
+
+sudo nano /etc/passwd
+
+Save the file.
+Wazuh generates an alert:
+
+File Modified
+
+/etc/passwd
+
+Severity: High
+
+
+
+SOC Analyst Action:
+◇ Verify who made the change.
+◇ Compare the new and previous versions.
+◇ Confirm whether it was authorized.
+
+
+3. Malware Detection
+Copy a known test malware file such as the EICAR test file to the monitored endpoint.
+Alert:
+
+Malware Detected
+
+EICAR Test File
+
+Severity: Critical
+
+
+SOC Analyst Action:
+◇ Isolate the endpoint if needed.
+◇ Remove the file.
+◇ Investigate how it was introduced.
+
+
+4. Root Login Detection
+Edit the SSH configuration to permit root login (for testing only), then log in as root.
+Alert:
+
+Successful Root Login
+
+Severity: Medium
+
+
+SOC Analyst Action:
+◇ Verify whether root access is expected.
+◇ Check the source IP and user activity.
+
+
+5. USB Detection (Windows)
+Insert a USB drive.
+Alert:
+
+USB Device Connected
+
+Device Name
+
+Kingston DataTraveler
+
+
+SOC Analyst Action:
+◇ Confirm whether USB usage is allowed.
+◇ Check for data transfers if necessary.
+
+
+6. New User Created
+Linux:
+
+
+
+sudo adduser hacker
+
+
+Alert:
+
+New User Created
+
+Username
+
+hacker
+
+
+
+SOC Analyst Action:
+◇ Verify who created the account.
+◇ Remove unauthorized accounts.
+◇ Review related administrative actions.
+
+
+Typical SOC Investigation Workflow
+1. Alert Received – Wazuh raises an alert.
+2. Validate – Check if it is a true positive or false positive.
+3. Investigate – Review logs, affected host, user, and timeline.
+4. Contain – Isolate the endpoint or block the attacker if necessary.
+5. Eradicate – Remove malware, disable malicious accounts, or fix the issue.
+6. Recover – Restore normal operations and verify systems.
+7. Document – Record findings and lessons learned.
+
