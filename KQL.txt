@@ -1,0 +1,1941 @@
+KQL
+
+Q What is KQL?
+
+KQL stands for Kusto Query Language.
+
+It is a query language used to search, filter, analyze, and visualize data stored in Microsoft services such as:
+
+• Microsoft Sentinel — SIEM and threat hunting.
+
+• Microsoft Defender XDR — endpoint and security investigations.
+
+• Azure Monitor and Log Analytics — system, application, and infrastructure logs.
+
+
+Think of KQL as SQL-like querying for security logs. 
+You ask questions about log data, and KQL returns the matching records.
+
+For example, a SOC analyst might ask:
+
+◇ Which users had failed login attempts?
+◇ Which IP addresses generated suspicious activity?
+◇ Which devices executed PowerShell?
+◇ Which users logged in from unusual locations?
+◇ How many security alerts occurred in the last 24 hours?
+KQL helps answer these questions.
+
+
+
+
+Start with these queries. They use Microsoft Sentinel log tables, so run them in a workspace that has the relevant tables and data.
+
+
+
+
+
+for practice KQL =   https://help.kusto.windows.net
+
+
+
+practice table :- 
+
+let SecurityLogs = datatable(
+    TimeGenerated: datetime,
+    User: string,
+    SrcIP: string,
+    Action: string,
+    Status: string,
+    Device: string,
+    Country: string,
+    Bytes: long,
+    Severity: string,
+    Process: string,
+    EventID: int
+)
+[
+    datetime(2026-10-02T10:00:00), "gaurav", "192.168.1.10", "Login", "Success", "PC-01", "India", 1200, "Low", "explorer.exe", 4624,
+    datetime(2026-10-02T10:01:00), "admin", "192.168.1.20", "Login", "Failed", "PC-02", "India", 400, "Medium", "login.exe", 4625,
+    datetime(2026-10-02T10:02:00), "rahul", "10.0.0.15", "Login", "Success", "LAPTOP-01", "India", 1500, "Low", "explorer.exe", 4624,
+    datetime(2026-10-02T10:03:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 300, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:04:00), "pooja", "192.168.1.15", "FileAccess", "Success", "PC-03", "India", 8500, "Low", "winword.exe", 4663,
+    datetime(2026-10-02T10:05:00), "testuser", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 250, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:06:00), "gaurav", "192.168.1.10", "ProcessStart", "Success", "PC-01", "India", 2400, "Low", "powershell.exe", 4688,
+    datetime(2026-10-02T10:07:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 200, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:08:00), "rahul", "10.0.0.15", "NetworkConnection", "Success", "LAPTOP-01", "India", 50000, "Medium", "chrome.exe", 5156,
+    datetime(2026-10-02T10:09:00), "pooja", "192.168.1.15", "ProcessStart", "Success", "PC-03", "India", 3100, "Low", "notepad.exe", 4688,
+    datetime(2026-10-02T10:10:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 180, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:11:00), "gaurav", "192.168.1.10", "FileAccess", "Success", "PC-01", "India", 9000, "Low", "excel.exe", 4663,
+    datetime(2026-10-02T10:12:00), "service1", "10.0.0.5", "ServiceStart", "Success", "SERVER-02", "India", 4000, "Medium", "svchost.exe", 7036,
+    datetime(2026-10-02T10:13:00), "testuser", "198.51.100.40", "Login", "Failed", "PC-04", "UK", 220, "Medium", "login.exe", 4625,
+    datetime(2026-10-02T10:14:00), "rahul", "10.0.0.15", "ProcessStart", "Success", "LAPTOP-01", "India", 1700, "Low", "python.exe", 4688,
+    datetime(2026-10-02T10:15:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 190, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:16:00), "pooja", "192.168.1.15", "NetworkConnection", "Success", "PC-03", "India", 75000, "Medium", "chrome.exe", 5156,
+    datetime(2026-10-02T10:17:00), "guest", "198.51.100.40", "Login", "Failed", "PC-04", "UK", 150, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:18:00), "gaurav", "192.168.1.10", "ProcessStart", "Success", "PC-01", "India", 2100, "Low", "cmd.exe", 4688,
+    datetime(2026-10-02T10:19:00), "service1", "10.0.0.5", "NetworkConnection", "Success", "SERVER-02", "India", 90000, "Medium", "svchost.exe", 5156,
+    datetime(2026-10-02T10:20:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 170, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:21:00), "rahul", "10.0.0.15", "FileAccess", "Success", "LAPTOP-01", "India", 6500, "Low", "winword.exe", 4663,
+    datetime(2026-10-02T10:22:00), "guest", "198.51.100.40", "Login", "Failed", "PC-04", "UK", 130, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:23:00), "pooja", "192.168.1.15", "ProcessStart", "Success", "PC-03", "India", 2800, "Low", "powershell.exe", 4688,
+    datetime(2026-10-02T10:24:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 160, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:25:00), "gaurav", "192.168.1.10", "NetworkConnection", "Success", "PC-01", "India", 120000, "Medium", "chrome.exe", 5156,
+    datetime(2026-10-02T10:26:00), "testuser", "198.51.100.40", "Login", "Failed", "PC-04", "UK", 110, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:27:00), "rahul", "10.0.0.15", "ProcessStart", "Success", "LAPTOP-01", "India", 3200, "Low", "powershell.exe", 4688,
+    datetime(2026-10-02T10:28:00), "admin", "203.0.113.25", "Login", "Failed", "SERVER-01", "USA", 140, "High", "login.exe", 4625,
+    datetime(2026-10-02T10:29:00), "pooja", "192.168.1.15", "FileAccess", "Success", "PC-03", "India", 4500, "Low", "excel.exe", 4663
+];
+SecurityLogs
+| take 100
+
+
+
+
+SecurityLogs
+| where Status == "Failed"
+| project TimeGenerated, User, SrcIP, Device, Severity
+| order by TimeGenerated desc
+
+SecurityLogs
+| count
+
+SecurityLogs
+| project TimeGenerated, User, Action, Status
+
+SecurityLogs
+| where Status == "Failed"
+
+SecurityLogs
+| where Action == "Login" and Status == "Success"     (Sucessifully logins)
+
+
+SecurityLogs
+| where Severity == "High"   (High servicity)
+
+
+SecurityLogs
+| where User == "admin"   (Pe	
+
+SecurityLogs
+| where User in ("admin", "guest", "testuser")        (multiple user )
+
+
+
+
+
+
+---------------------------------------------------
+
+1. How to run the queries
+Keep your complete let SecurityLogs = datatable(...) [...] ; block at the top. Below it, replace SecurityLogs | take 100 with one practice query at a time.
+For example:
+SecurityLogs
+| where Status == "Failed"
+| project TimeGenerated, User, SrcIP, Device, Severity
+| order by TimeGenerated desc
+
+This displays failed logins with their timestamps, users, source IPs, devices, and severity.
+Important: Your table is simulated training data. IP addresses such as 203.0.113.25 and 198.51.100.40 belong to ranges reserved for documentation, so treat the results as lab exercises rather than evidence of real attacks.
+
+
+
+
+
+
+2. Beginner KQL queries
+Practice set 1 — basic operators
+
+1. Display all records
+SecurityLogs
+
+Returns all 30 rows and all 11 columns.
+
+
+2. Show only 5 records
+SecurityLogs
+| take 5
+
+
+
+3. Count total logs
+SecurityLogs
+| count
+
+Expected count: 30.
+
+
+4. Display selected columns — project
+SecurityLogs
+| 												 TimeGenerated, User, Action, Status
+
+
+
+5. Filter failed logins — where
+SecurityLogs
+| where Status == "Failed"
+
+Expected: 12 records.
+
+
+6. Filter successful logins
+SecurityLogs
+| where Action == "Login" and Status == "Success"
+
+
+
+7. Filter high-severity logs
+SecurityLogs
+| where Severity == "High"
+
+
+
+8. Find a particular user
+SecurityLogs
+| where User == "admin"
+
+
+
+9. Match multiple users — in
+SecurityLogs
+| where User in ("admin", "guest", "testuser")
+
+
+
+10. Exclude successful events — !=
+SecurityLogs
+| where Status != "Success"
+
+
+These use KQL's pipe-based query flow and common filtering operators. 
+
+Microsoft Learn
++1
+
+
+
+
+
+3. Search, strings, and conditions
+
+11. Search text across columns
+SecurityLogs
+| search "powershell"
+
+
+
+12. Find processes containing exe
+SecurityLogs
+| where Process contains "exe"
+
+
+
+13. Case-insensitive username match
+SecurityLogs
+| where User =~ "ADMIN"
+
+
+
+14. Prefix match
+SecurityLogs
+| where SrcIP startswith "203."
+
+
+
+15. Suffix match
+SecurityLogs
+| where Process endswith ".exe"
+
+
+
+16. Match either condition — or
+SecurityLogs
+| where Severity == "High" or Status == "Failed"
+
+
+
+17. Combine conditions — and
+SecurityLogs
+| where Status == "Failed" and Severity == "High"
+
+
+
+18. Exclude several usernames
+SecurityLogs
+| where User !in ("guest", "testuser")
+
+
+
+19. Use a regular expression
+SecurityLogs
+| where SrcIP matches regex @"^203\."
+
+
+
+20. Search for a Windows event ID
+SecurityLogs
+| where EventID == 4625
+
+Windows Security Event ID 4625 commonly represents a failed logon.
+
+
+4. Sorting, limits, and time filters
+
+21. Latest logs first
+SecurityLogs
+| sort by TimeGenerated desc
+
+
+
+22. Earliest logs first
+SecurityLogs
+| order by TimeGenerated asc
+
+
+
+23. Top 5 largest byte values
+SecurityLogs
+| top 5 by Bytes desc
+
+
+
+24. Find logs within a time range
+SecurityLogs
+| where TimeGenerated between
+    (datetime(2026-10-02T10:00:00) ..
+     datetime(2026-10-02T10:15:00))
+
+
+
+25. Extract the hour and minute
+SecurityLogs
+| extend LogTime = format_datetime(
+    TimeGenerated, "HH:mm")
+| project LogTime, User, Action, Status
+
+
+
+26. Logs from the last 10 minutes of the dataset
+SecurityLogs
+| where TimeGenerated >= datetime(2026-10-02T10:20:00)
+
+Because the dataset is fixed, use its timestamps rather than ago(10m), which is relative to the actual query execution time.
+
+
+5. Aggregations with summarize
+This section is especially useful for SOC dashboards and incident triage. summarize groups records and calculates counts, sums, averages, and other statistics. 
+
+Microsoft Learn
++1
+
+
+
+
+
+27. Count logs by user
+SecurityLogs
+| summarize TotalLogs = count() by User
+| order by TotalLogs desc
+
+
+
+28. Count logs by severity
+SecurityLogs
+| summarize Total = count() by Severity
+
+
+
+29. Failed login count per user
+SecurityLogs
+| where EventID == 4625
+| summarize FailedLogins = count() by User
+| order by FailedLogins desc
+
+
+
+30. Failed logins per source IP
+SecurityLogs
+| where Status == "Failed"
+| summarize Failures = count() by SrcIP
+| order by Failures desc
+
+
+
+31. Count unique users
+SecurityLogs
+| summarize UniqueUsers = dcount(User)
+
+
+
+32. Count distinct source IPs
+SecurityLogs
+| summarize UniqueIPs = dcount(SrcIP)
+
+
+
+33. Average bytes per event
+SecurityLogs
+| summarize AverageBytes = avg(Bytes)
+
+
+
+34. Minimum and maximum bytes
+SecurityLogs
+| summarize MinBytes = min(Bytes),
+            MaxBytes = max(Bytes)
+
+
+
+35. Total bytes by device
+SecurityLogs
+| summarize TotalBytes = sum(Bytes) by Device
+| order by TotalBytes desc
+
+
+
+36. Count events by action and status
+SecurityLogs
+| summarize Total = count() by Action, Status
+
+
+
+37. High-severity events by country
+SecurityLogs
+| where Severity == "High"
+| summarize Events = count() by Country
+
+
+
+38. Successful versus failed events
+SecurityLogs
+| summarize
+    Success = countif(Status == "Success"),
+    Failed = countif(Status == "Failed")
+
+
+
+39. Calculate failure percentage
+SecurityLogs
+| summarize
+    Total = count(),
+    Failed = countif(Status == "Failed")
+| extend FailurePercent =
+    round(100.0 * Failed / Total, 2)
+
+
+
+40. Most frequent process per device
+SecurityLogs
+| summarize Events = count() by Device, Process
+| sort by Device asc, Events desc
+
+
+
+
+
+
+
+
+
+
+6. Create new columns with extend, case, and iff
+
+41. Create a readable event category
+SecurityLogs
+| extend EventCategory = case(
+    EventID == 4625, "Failed Logon",
+    EventID == 4624, "Successful Logon",
+    EventID == 4688, "Process Creation",
+    EventID == 4663, "Object Access",
+    "Other Event"
+)
+| project TimeGenerated, User, EventID, EventCategory
+
+
+
+42. Flag failed logins
+SecurityLogs
+| extend Alert = iff(
+    Status == "Failed", "Investigate", "Normal")
+| project User, SrcIP, Status, Alert
+
+
+
+43. Create a byte-size category
+SecurityLogs
+| extend TrafficLevel = case(
+    Bytes >= 75000, "Very High",
+    Bytes >= 10000, "High",
+    Bytes >= 2000, "Medium",
+    "Low"
+)
+| project User, Device, Bytes, TrafficLevel
+
+
+
+44. Convert bytes to kilobytes
+SecurityLogs
+| extend KB = round(todouble(Bytes) / 1024.0, 2)
+| project User, Process, Bytes, KB
+
+
+
+45. Combine user and device names
+SecurityLogs
+| extend UserDevice = strcat(User, "@", Device)
+| project UserDevice, SrcIP, Action
+
+
+
+46. Extract the IP's first three octets
+SecurityLogs
+| extend IPPrefix = extract(
+    @"^(\d+\.\d+\.\d+)\.", 1, SrcIP)
+| project SrcIP, IPPrefix
+
+
+
+47. Classify events using case()
+SecurityLogs
+| extend Risk = case(
+    Status == "Failed" and Severity == "High",
+        "Investigate",
+    Status == "Failed", "Review",
+    "Routine"
+)
+| summarize Total = count() by Risk
+
+
+
+48. Rename columns
+SecurityLogs
+| project
+    EventTime = TimeGenerated,
+    Account = User,
+    SourceAddress = SrcIP,
+    EventType = Action
+
+
+
+7. Advanced aggregations and record selection
+
+49. Show the latest event for every user
+SecurityLogs
+| summarize arg_max(TimeGenerated, *) by User
+
+
+
+50. Show the earliest event for every user
+SecurityLogs
+| summarize arg_min(TimeGenerated, *) by User
+
+
+
+51. Get the top three users by log count
+SecurityLogs
+| summarize Events = count() by User
+| top 3 by Events desc
+
+
+
+52. Count unique processes per user
+SecurityLogs
+| summarize UniqueProcesses = dcount(Process) by User
+
+
+
+53. Get the 90th percentile of bytes
+SecurityLogs
+| summarize P90Bytes = percentile(Bytes, 90)
+
+
+
+54. Find users with more than two failed logins
+SecurityLogs
+| where Status == "Failed"
+| summarize Failures = count() by User
+| where Failures > 2
+
+
+
+55. Count unique event IDs
+SecurityLogs
+| summarize EventTypes = dcount(EventID)
+
+
+
+56. Show event IDs with their associated actions
+SecurityLogs
+| summarize Actions = make_set(Action) by EventID
+
+
+
+57. Build a list of users per country
+SecurityLogs
+| summarize Users = make_set(User) by Country
+
+
+
+58. Find devices with multiple source IPs
+SecurityLogs
+| summarize IPCount = dcount(SrcIP) by Device
+| where IPCount > 1
+
+
+
+59. Find the most recent high-severity record
+SecurityLogs
+| where Severity == "High"
+| summarize arg_max(TimeGenerated, *)
+
+
+
+60. Find processes associated with failed logins
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Events = count(),
+    Users = make_set(User)
+    by Process
+
+
+
+8. SOC threat hunting queries
+These queries use your dataset to investigate suspicious activity. A detection result is a lead for investigation, not proof of compromise.
+
+61. Identify repeated failed logins from an IP
+SecurityLogs
+| where EventID == 4625
+| summarize
+    Failures = count(),
+    TargetUsers = make_set(User),
+    Devices = make_set(Device)
+    by SrcIP
+| where Failures >= 3
+| order by Failures desc
+
+SOC use: identify possible password guessing.
+
+
+62. Find accounts targeted by multiple IPs
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Attempts = count(),
+    SourceIPs = make_set(SrcIP),
+    UniqueIPs = dcount(SrcIP)
+    by User
+| where UniqueIPs > 1
+
+
+
+63. Find accounts with failed and successful logins
+let FailedUsers =
+    SecurityLogs
+    | where EventID == 4625
+    | distinct User;
+let SuccessfulUsers =
+    SecurityLogs
+    | where EventID == 4624
+    | distinct User;
+FailedUsers
+| join kind=inner (SuccessfulUsers) on User
+
+This identifies users with both event types somewhere in the dataset. It does not prove that a successful login occurred after a failure.
+
+
+64. Look for PowerShell execution
+SecurityLogs
+| where Process =~ "powershell.exe"
+| project TimeGenerated, User, SrcIP, Device, Severity
+
+
+
+65. Find PowerShell activity on each device
+SecurityLogs
+| where Process has "powershell"
+| summarize
+    Events = count(),
+    Accounts = make_set(User)
+    by Device
+
+
+
+66. Identify high-byte network events
+SecurityLogs
+| where Action == "NetworkConnection"
+| where Bytes >= 50000
+| project TimeGenerated, User, SrcIP, Device, Process, Bytes
+| order by Bytes desc
+
+SOC use: investigate unusually large recorded byte values. The data alone does not establish data exfiltration.
+
+
+67. Find accounts using multiple devices
+SecurityLogs
+| summarize Devices = make_set(Device),
+            DeviceCount = dcount(Device)
+    by User
+| where DeviceCount > 1
+
+
+
+68. Find high-severity failed logins on servers
+SecurityLogs
+| where Status == "Failed"
+| where Severity == "High"
+| where Device startswith "SERVER"
+| project TimeGenerated, User, SrcIP, Device, EventID
+
+
+
+69. Count failed logins in one-minute bins
+SecurityLogs
+| where EventID == 4625
+| summarize Failures = count()
+    by bin(TimeGenerated, 1m), SrcIP
+| order by TimeGenerated asc
+
+
+
+70. Find a source IP targeting multiple accounts
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Attempts = count(),
+    AccountsTargeted = dcount(User),
+    TargetList = make_set(User)
+    by SrcIP
+| where AccountsTargeted >= 3
+
+
+
+
+
+
+
+
+9. Time-based analysis and detection patterns
+
+71. Count logs every five minutes
+SecurityLogs
+| summarize Events = count()
+    by bin(TimeGenerated, 5m)
+| order by TimeGenerated asc
+
+
+
+72. Count failed logins every five minutes
+SecurityLogs
+| where Status == "Failed"
+| summarize Failures = count()
+    by bin(TimeGenerated, 5m)
+| order by TimeGenerated asc
+
+
+
+73. Find accounts with at least three failures in any five-minute window
+SecurityLogs
+| where EventID == 4625
+| summarize Failures = count()
+    by User, bin(TimeGenerated, 5m)
+| where Failures >= 3
+
+This uses fixed five-minute buckets, not a sliding five-minute window.
+
+
+74. Find the time between consecutive events per user
+SecurityLogs
+| sort by User asc, TimeGenerated asc
+| serialize
+| extend PreviousUser = prev(User),
+         PreviousTime = prev(TimeGenerated)
+| where User == PreviousUser
+| extend SecondsBetween =
+    datetime_diff("second", TimeGenerated, PreviousTime)
+| project User, PreviousTime, TimeGenerated, SecondsBetween
+
+
+
+75. Calculate first and last activity per account
+SecurityLogs
+| summarize
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    TotalEvents = count()
+    by User
+
+
+
+76. Detect an IP associated with many failed logins and devices
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Failures = count(),
+    Devices = dcount(Device),
+    Accounts = dcount(User)
+    by SrcIP
+| where Failures >= 3 and Accounts >= 2
+
+
+
+77. Identify rare processes
+SecurityLogs
+| summarize ProcessEvents = count() by Process
+| where ProcessEvents <= 2
+| order by ProcessEvents asc
+
+Rare does not automatically mean malicious.
+
+
+78. Identify users whose failed-login count exceeds the average per user
+let UserFailures =
+    SecurityLogs
+    | where Status == "Failed"
+    | summarize Failures = count() by User;
+let AverageFailures =
+    toscalar(UserFailures | summarize avg(Failures));
+UserFailures
+| where Failures > AverageFailures
+| order by Failures desc
+
+
+
+79. Find users with activity across multiple countries
+SecurityLogs
+| summarize
+    Countries = make_set(Country),
+    CountryCount = dcount(Country)
+    by User
+| where CountryCount > 1
+
+
+
+80. Show the earliest and latest timestamps by source IP
+SecurityLogs
+| summarize
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    TotalEvents = count()
+    by SrcIP
+| order by TotalEvents desc
+
+
+
+10. Joins, unions, and reusable query blocks
+KQL supports joining datasets on common keys and combining results with union. These are useful for correlating authentication, endpoint, and network telemetry. 
+
+Microsoft Learn
++1
+
+
+
+
+
+81. Join failed and successful logins by user
+let Failed =
+    SecurityLogs
+    | where EventID == 4625
+    | summarize FailedCount = count() by User;
+let Success =
+    SecurityLogs
+    | where EventID == 4624
+    | summarize SuccessCount = count() by User;
+Failed
+| join kind=inner (Success) on User
+
+
+
+82. Find users with failures but no successful login in the dataset
+let Failed =
+    SecurityLogs
+    | where EventID == 4625
+    | distinct User;
+let Success =
+    SecurityLogs
+    | where EventID == 4624
+    | distinct User;
+Failed
+| join kind=leftanti (Success) on User
+
+
+
+83. Keep every failed event and add the user's success count
+let Success =
+    SecurityLogs
+    | where EventID == 4624
+    | summarize SuccessCount = count() by User;
+SecurityLogs
+| where EventID == 4625
+| join kind=leftouter (Success) on User
+| project TimeGenerated, User, SrcIP, Device, SuccessCount
+
+
+
+84. Combine two filtered result sets with union
+union
+    (SecurityLogs | where Status == "Failed"),
+    (SecurityLogs | where Severity == "High")
+
+Rows that satisfy both conditions can appear twice. Use distinct or a single where condition if deduplication is required.
+
+
+85. Create a reusable function-like query block
+let FailedEvents = (T:(User:string, Status:string)) {
+    T | where Status == "Failed"
+};
+FailedEvents(SecurityLogs)
+
+This illustrates a tabular function signature; because your table has additional columns and a schema-specific parameter can be restrictive, use this simpler alternative if the signature causes an error:
+let FailedEvents = () {
+    SecurityLogs | where Status == "Failed"
+};
+FailedEvents()
+
+
+
+86. Find IPs appearing on multiple devices
+SecurityLogs
+| summarize
+    DeviceCount = dcount(Device),
+    Devices = make_set(Device)
+    by SrcIP
+| where DeviceCount > 1
+
+
+
+87. Compare total events and failures by user
+SecurityLogs
+| summarize
+    Total = count(),
+    Failures = countif(Status == "Failed"),
+    Successes = countif(Status == "Success")
+    by User
+| extend FailureRate = round(100.0 * Failures / Total, 2)
+| order by FailureRate desc
+
+
+
+88. Find devices that have both login failures and process starts
+let FailedDevices =
+    SecurityLogs
+    | where EventID == 4625
+    | distinct Device;
+let ProcessDevices =
+    SecurityLogs
+    | where EventID == 4688
+    | distinct Device;
+FailedDevices
+| join kind=inner (ProcessDevices) on Device
+
+
+
+11. More useful KQL functions
+
+89. Count events using countif()
+SecurityLogs
+| summarize
+    HighSeverity = countif(Severity == "High"),
+    FailedEvents = countif(Status == "Failed"),
+    NetworkEvents = countif(Action == "NetworkConnection")
+
+
+
+90. Find median byte count
+SecurityLogs
+| summarize MedianBytes = percentile(Bytes, 50)
+
+
+
+91. Find variance and standard deviation of bytes
+SecurityLogs
+| summarize
+    ByteVariance = variance(Bytes),
+    ByteStdDev = stdev(Bytes)
+
+
+
+92. Round event times to the nearest minute bucket
+SecurityLogs
+| extend MinuteBucket = bin(TimeGenerated, 1m)
+| project TimeGenerated, MinuteBucket, User, Action
+
+
+
+93. Create a summary string
+SecurityLogs
+| extend Summary = strcat(
+    User, " | ", Action, " | ", Status, " | ", SrcIP)
+| project Summary
+
+
+
+94. Filter using a dynamic list
+let SuspiciousIPs = dynamic(["203.0.113.25", "198.51.100.40"]);
+SecurityLogs
+| where SrcIP in (SuspiciousIPs)
+
+
+
+95. Return only unique combinations of user and IP
+SecurityLogs
+| distinct User, SrcIP
+
+
+
+96. Find missing or empty values
+SecurityLogs
+| where isempty(User) or isempty(SrcIP) or isempty(Process)
+
+Your sample has no intentional empty values, so this should return no rows.
+
+
+97. Project a calculated severity priority
+SecurityLogs
+| extend Priority = case(
+    Severity == "High", 1,
+    Severity == "Medium", 2,
+    3
+)
+| order by Priority asc, TimeGenerated desc
+
+
+
+98. Find the percentage of events for each action
+let Total = toscalar(SecurityLogs | count);
+SecurityLogs
+| summarize Events = count() by Action
+| extend Percentage = round(100.0 * Events / Total, 2)
+| order by Percentage desc
+
+
+
+99. Calculate a cumulative event count
+SecurityLogs
+| sort by TimeGenerated asc
+| serialize
+| extend CumulativeEvents = row_number()
+| project TimeGenerated, User, Action, CumulativeEvents
+
+
+
+100. Build a mini SOC summary
+SecurityLogs
+| summarize
+    TotalEvents = count(),
+    FailedLogins = countif(EventID == 4625),
+    SuccessfulLogins = countif(EventID == 4624),
+    HighSeverity = countif(Severity == "High"),
+    UniqueUsers = dcount(User),
+    UniqueIPs = dcount(SrcIP),
+    TotalBytes = sum(Bytes)
+
+
+
+
+
+
+
+1. How to run the queries
+Keep your complete let SecurityLogs = datatable(...) [...] ; block at the top. Below it, replace SecurityLogs | take 100 with one practice query at a time.
+For example:
+SecurityLogs
+| where Status == "Failed"
+| project TimeGenerated, User, SrcIP, Device, Severity
+| order by TimeGenerated desc
+
+This displays failed logins with their timestamps, users, source IPs, devices, and severity.
+Important: Your table is simulated training data. IP addresses such as 203.0.113.25 and 198.51.100.40 belong to ranges reserved for documentation, so treat the results as lab exercises rather than evidence of real attacks.
+
+
+
+
+
+
+2. Beginner KQL queries
+Practice set 1 — basic operators
+
+1. Display all records
+SecurityLogs
+
+Returns all 30 rows and all 11 columns.
+
+
+2. Show only 5 records
+SecurityLogs
+| take 5
+
+
+
+3. Count total logs
+SecurityLogs
+| count
+
+Expected count: 30.
+
+
+4. Display selected columns — project
+SecurityLogs
+| project TimeGenerated, User, Action, Status
+
+
+
+5. Filter failed logins — where
+SecurityLogs
+| where Status == "Failed"
+
+Expected: 12 records.
+
+
+6. Filter successful logins
+SecurityLogs
+| where Action == "Login" and Status == "Success"
+
+
+
+7. Filter high-severity logs
+SecurityLogs
+| where Severity == "High"
+
+
+
+8. Find a particular user
+SecurityLogs
+| where User == "admin"
+
+
+
+9. Match multiple users — in
+SecurityLogs
+| where User in ("admin", "guest", "testuser")
+
+
+
+10. Exclude successful events — !=
+SecurityLogs
+| where Status != "Success"
+
+
+These use KQL's pipe-based query flow and common filtering operators. 
+
+Microsoft Learn
++1
+
+
+
+
+
+3. Search, strings, and conditions
+
+11. Search text across columns
+SecurityLogs
+| search "powershell"
+
+
+
+12. Find processes containing exe
+SecurityLogs
+| where Process contains "exe"
+
+
+
+13. Case-insensitive username match
+SecurityLogs
+| where User =~ "ADMIN"
+
+
+
+14. Prefix match
+SecurityLogs
+| where SrcIP startswith "203."
+
+
+
+15. Suffix match
+SecurityLogs
+| where Process endswith ".exe"
+
+
+
+16. Match either condition — or
+SecurityLogs
+| where Severity == "High" or Status == "Failed"
+
+
+
+17. Combine conditions — and
+SecurityLogs
+| where Status == "Failed" and Severity == "High"
+
+
+
+18. Exclude several usernames
+SecurityLogs
+| where User !in ("guest", "testuser")
+
+
+
+19. Use a regular expression
+SecurityLogs
+| where SrcIP matches regex @"^203\."
+
+
+
+20. Search for a Windows event ID
+SecurityLogs
+| where EventID == 4625
+
+Windows Security Event ID 4625 commonly represents a failed logon.
+
+
+4. Sorting, limits, and time filters
+
+21. Latest logs first
+SecurityLogs
+| sort by TimeGenerated desc
+
+
+
+22. Earliest logs first
+SecurityLogs
+| order by TimeGenerated asc
+
+
+
+23. Top 5 largest byte values
+SecurityLogs
+| top 5 by Bytes desc
+
+
+
+24. Find logs within a time range
+SecurityLogs
+| where TimeGenerated between
+    (datetime(2026-10-02T10:00:00) ..
+     datetime(2026-10-02T10:15:00))
+
+
+
+25. Extract the hour and minute
+SecurityLogs
+| extend LogTime = format_datetime(
+    TimeGenerated, "HH:mm")
+| project LogTime, User, Action, Status
+
+
+
+26. Logs from the last 10 minutes of the dataset
+SecurityLogs
+| where TimeGenerated >= datetime(2026-10-02T10:20:00)
+
+Because the dataset is fixed, use its timestamps rather than ago(10m), which is relative to the actual query execution time.
+
+
+5. Aggregations with summarize
+This section is especially useful for SOC dashboards and incident triage. summarize groups records and calculates counts, sums, averages, and other statistics. 
+
+Microsoft Learn
++1
+
+
+
+
+
+27. Count logs by user
+SecurityLogs
+| summarize TotalLogs = count() by User
+| order by TotalLogs desc
+
+
+
+28. Count logs by severity
+SecurityLogs
+| summarize Total = count() by Severity
+
+
+
+29. Failed login count per user
+SecurityLogs
+| where EventID == 4625
+| summarize FailedLogins = count() by User
+| order by FailedLogins desc
+
+
+
+30. Failed logins per source IP
+SecurityLogs
+| where Status == "Failed"
+| summarize Failures = count() by SrcIP
+| order by Failures desc
+
+
+
+31. Count unique users
+SecurityLogs
+| summarize UniqueUsers = dcount(User)
+
+
+
+32. Count distinct source IPs
+SecurityLogs
+| summarize UniqueIPs = dcount(SrcIP)
+
+
+
+33. Average bytes per event
+SecurityLogs
+| summarize AverageBytes = avg(Bytes)
+
+
+
+34. Minimum and maximum bytes
+SecurityLogs
+| summarize MinBytes = min(Bytes),
+            MaxBytes = max(Bytes)
+
+
+
+35. Total bytes by device
+SecurityLogs
+| summarize TotalBytes = sum(Bytes) by Device
+| order by TotalBytes desc
+
+
+
+36. Count events by action and status
+SecurityLogs
+| summarize Total = count() by Action, Status
+
+
+
+37. High-severity events by country
+SecurityLogs
+| where Severity == "High"
+| summarize Events = count() by Country
+
+
+
+38. Successful versus failed events
+SecurityLogs
+| summarize
+    Success = countif(Status == "Success"),
+    Failed = countif(Status == "Failed")
+
+
+
+39. Calculate failure percentage
+SecurityLogs
+| summarize
+    Total = count(),
+    Failed = countif(Status == "Failed")
+| extend FailurePercent =
+    round(100.0 * Failed / Total, 2)
+
+
+
+40. Most frequent process per device
+SecurityLogs
+| summarize Events = count() by Device, Process
+| sort by Device asc, Events desc
+
+
+
+
+
+
+
+
+
+
+6. Create new columns with extend, case, and iff
+
+41. Create a readable event category
+SecurityLogs
+| extend EventCategory = case(
+    EventID == 4625, "Failed Logon",
+    EventID == 4624, "Successful Logon",
+    EventID == 4688, "Process Creation",
+    EventID == 4663, "Object Access",
+    "Other Event"
+)
+| project TimeGenerated, User, EventID, EventCategory
+
+
+
+42. Flag failed logins
+SecurityLogs
+| extend Alert = iff(
+    Status == "Failed", "Investigate", "Normal")
+| project User, SrcIP, Status, Alert
+
+
+
+43. Create a byte-size category
+SecurityLogs
+| extend TrafficLevel = case(
+    Bytes >= 75000, "Very High",
+    Bytes >= 10000, "High",
+    Bytes >= 2000, "Medium",
+    "Low"
+)
+| project User, Device, Bytes, TrafficLevel
+
+
+
+44. Convert bytes to kilobytes
+SecurityLogs
+| extend KB = round(todouble(Bytes) / 1024.0, 2)
+| project User, Process, Bytes, KB
+
+
+
+45. Combine user and device names
+SecurityLogs
+| extend UserDevice = strcat(User, "@", Device)
+| project UserDevice, SrcIP, Action
+
+
+
+46. Extract the IP's first three octets
+SecurityLogs
+| extend IPPrefix = extract(
+    @"^(\d+\.\d+\.\d+)\.", 1, SrcIP)
+| project SrcIP, IPPrefix
+
+
+
+47. Classify events using case()
+SecurityLogs
+| extend Risk = case(
+    Status == "Failed" and Severity == "High",
+        "Investigate",
+    Status == "Failed", "Review",
+    "Routine"
+)
+| summarize Total = count() by Risk
+
+
+48. Rename columns
+SecurityLogs
+| project
+    EventTime = TimeGenerated,
+    Account = User,
+    SourceAddress = SrcIP,
+    EventType = Action
+
+7. Advanced aggregations and record selection
+
+49. Show the latest event for every user
+SecurityLogs
+| summarize arg_max(TimeGenerated, *) by User
+
+
+50. Show the earliest event for every user
+SecurityLogs
+| summarize arg_min(TimeGenerated, *) by User
+
+51. Get the top three users by log count
+SecurityLogs
+| summarize Events = count() by User
+| top 3 by Events desc
+
+
+52. Count unique processes per user
+SecurityLogs
+| summarize UniqueProcesses = dcount(Process) by User
+
+53. Get the 90th percentile of bytes
+SecurityLogs
+| summarize P90Bytes = percentile(Bytes, 90)
+
+
+54. Find users with more than two failed logins
+SecurityLogs
+| where Status == "Failed"
+| summarize Failures = count() by User
+| where Failures > 2
+
+
+55. Count unique event IDs
+SecurityLogs
+| summarize EventTypes = dcount(EventID)
+
+56. Show event IDs with their associated actions
+SecurityLogs
+| summarize Actions = make_set(Action) by EventID
+
+57. Build a list of users per country
+SecurityLogs
+| summarize Users = make_set(User) by Country
+
+58. Find devices with multiple source IPs
+SecurityLogs
+| summarize IPCount = dcount(SrcIP) by Device
+| where IPCount > 1
+
+59. Find the most recent high-severity record
+SecurityLogs
+| where Severity == "High"
+| summarize arg_max(TimeGenerated, *)
+
+60. Find processes associated with failed logins
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Events = count(),
+    Users = make_set(User)
+    by Process
+
+8. SOC threat hunting queries
+These queries use your dataset to investigate suspicious activity. A detection result is a lead for investigation, not proof of compromise.
+
+61. Identify repeated failed logins from an IP
+SecurityLogs
+| where EventID == 4625
+| summarize
+    Failures = count(),
+    TargetUsers = make_set(User),
+    Devices = make_set(Device)
+    by SrcIP
+| where Failures >= 3
+| order by Failures desc
+
+SOC use: identify possible password guessing.
+
+62. Find accounts targeted by multiple IPs
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Attempts = count(),
+    SourceIPs = make_set(SrcIP),
+    UniqueIPs = dcount(SrcIP)
+    by User
+| where UniqueIPs > 1
+
+63. Find accounts with failed and successful logins
+let FailedUsers =
+    SecurityLogs
+    | where EventID == 4625
+    | distinct User;
+let SuccessfulUsers =
+    SecurityLogs
+    | where EventID == 4624
+    | distinct User;
+FailedUsers
+| join kind=inner (SuccessfulUsers) on User
+
+This identifies users with both event types somewhere in the dataset. It does not prove that a successful login occurred after a failure.
+
+
+64. Look for PowerShell execution
+SecurityLogs
+| where Process =~ "powershell.exe"
+| project TimeGenerated, User, SrcIP, Device, Severity
+
+
+
+65. Find PowerShell activity on each device
+SecurityLogs
+| where Process has "powershell"
+| summarize
+    Events = count(),
+    Accounts = make_set(User)
+    by Device
+
+
+
+66. Identify high-byte network events
+SecurityLogs
+| where Action == "NetworkConnection"
+| where Bytes >= 50000
+| project TimeGenerated, User, SrcIP, Device, Process, Bytes
+| order by Bytes desc
+
+SOC use: investigate unusually large recorded byte values. The data alone does not establish data exfiltration.
+
+
+67. Find accounts using multiple devices
+SecurityLogs
+| summarize Devices = make_set(Device),
+            DeviceCount = dcount(Device)
+    by User
+| where DeviceCount > 1
+
+
+
+68. Find high-severity failed logins on servers
+SecurityLogs
+| where Status == "Failed"
+| where Severity == "High"
+| where Device startswith "SERVER"
+| project TimeGenerated, User, SrcIP, Device, EventID
+
+
+
+69. Count failed logins in one-minute bins
+SecurityLogs
+| where EventID == 4625
+| summarize Failures = count()
+    by bin(TimeGenerated, 1m), SrcIP
+| order by TimeGenerated asc
+
+
+
+70. Find a source IP targeting multiple accounts
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Attempts = count(),
+    AccountsTargeted = dcount(User),
+    TargetList = make_set(User)
+    by SrcIP
+| where AccountsTargeted >= 3
+
+
+
+
+
+
+
+
+9. Time-based analysis and detection patterns
+
+71. Count logs every five minutes
+SecurityLogs
+| summarize Events = count()
+    by bin(TimeGenerated, 5m)
+| order by TimeGenerated asc
+
+
+
+72. Count failed logins every five minutes
+SecurityLogs
+| where Status == "Failed"
+| summarize Failures = count()
+    by bin(TimeGenerated, 5m)
+| order by TimeGenerated asc
+
+
+
+73. Find accounts with at least three failures in any five-minute window
+SecurityLogs
+| where EventID == 4625
+| summarize Failures = count()
+    by User, bin(TimeGenerated, 5m)
+| where Failures >= 3
+
+This uses fixed five-minute buckets, not a sliding five-minute window.
+
+
+74. Find the time between consecutive events per user
+SecurityLogs
+| sort by User asc, TimeGenerated asc
+| serialize
+| extend PreviousUser = prev(User),
+         PreviousTime = prev(TimeGenerated)
+| where User == PreviousUser
+| extend SecondsBetween =
+    datetime_diff("second", TimeGenerated, PreviousTime)
+| project User, PreviousTime, TimeGenerated, SecondsBetween
+
+
+
+75. Calculate first and last activity per account
+SecurityLogs
+| summarize
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    TotalEvents = count()
+    by User
+
+
+
+76. Detect an IP associated with many failed logins and devices
+SecurityLogs
+| where Status == "Failed"
+| summarize
+    Failures = count(),
+    Devices = dcount(Device),
+    Accounts = dcount(User)
+    by SrcIP
+| where Failures >= 3 and Accounts >= 2
+
+
+
+77. Identify rare processes
+SecurityLogs
+| summarize ProcessEvents = count() by Process
+| where ProcessEvents <= 2
+| order by ProcessEvents asc
+
+Rare does not automatically mean malicious.
+
+
+78. Identify users whose failed-login count exceeds the average per user
+let UserFailures =
+    SecurityLogs
+    | where Status == "Failed"
+    | summarize Failures = count() by User;
+let AverageFailures =
+    toscalar(UserFailures | summarize avg(Failures));
+UserFailures
+| where Failures > AverageFailures
+| order by Failures desc
+
+
+
+79. Find users with activity across multiple countries
+SecurityLogs
+| summarize
+    Countries = make_set(Country),
+    CountryCount = dcount(Country)
+    by User
+| where CountryCount > 1
+
+
+
+80. Show the earliest and latest timestamps by source IP
+SecurityLogs
+| summarize
+    FirstSeen = min(TimeGenerated),
+    LastSeen = max(TimeGenerated),
+    TotalEvents = count()
+    by SrcIP
+| order by TotalEvents desc
+
+
+
+10. Joins, unions, and reusable query blocks
+KQL supports joining datasets on common keys and combining results with union. These are useful for correlating authentication, endpoint, and network telemetry. 
+
+Microsoft Learn
++1
+
+
+
+
+
+81. Join failed and successful logins by user
+let Failed =
+    SecurityLogs
+    | where EventID == 4625
+    | summarize FailedCount = count() by User;
+let Success =
+    SecurityLogs
+    | where EventID == 4624
+    | summarize SuccessCount = count() by User;
+Failed
+| join kind=inner (Success) on User
+
+
+
+82. Find users with failures but no successful login in the dataset
+let Failed =
+    SecurityLogs
+    | where EventID == 4625
+    | distinct User;
+let Success =
+    SecurityLogs
+    | where EventID == 4624
+    | distinct User;
+Failed
+| join kind=leftanti (Success) on User
+
+
+
+83. Keep every failed event and add the user's success count
+let Success =
+    SecurityLogs
+    | where EventID == 4624
+    | summarize SuccessCount = count() by User;
+SecurityLogs
+| where EventID == 4625
+| join kind=leftouter (Success) on User
+| project TimeGenerated, User, SrcIP, Device, SuccessCount
+
+
+
+84. Combine two filtered result sets with union
+union
+    (SecurityLogs | where Status == "Failed"),
+    (SecurityLogs | where Severity == "High")
+
+Rows that satisfy both conditions can appear twice. Use distinct or a single where condition if deduplication is required.
+
+
+85. Create a reusable function-like query block
+let FailedEvents = (T:(User:string, Status:string)) {
+    T | where Status == "Failed"
+};
+FailedEvents(SecurityLogs)
+
+This illustrates a tabular function signature; because your table has additional columns and a schema-specific parameter can be restrictive, use this simpler alternative if the signature causes an error:
+let FailedEvents = () {
+    SecurityLogs | where Status == "Failed"
+};
+FailedEvents()
+
+
+
+86. Find IPs appearing on multiple devices
+SecurityLogs
+| summarize
+    DeviceCount = dcount(Device),
+    Devices = make_set(Device)
+    by SrcIP
+| where DeviceCount > 1
+
+
+
+87. Compare total events and failures by user
+SecurityLogs
+| summarize
+    Total = count(),
+    Failures = countif(Status == "Failed"),
+    Successes = countif(Status == "Success")
+    by User
+| extend FailureRate = round(100.0 * Failures / Total, 2)
+| order by FailureRate desc
+
+
+
+88. Find devices that have both login failures and process starts
+let FailedDevices =
+    SecurityLogs
+    | where EventID == 4625
+    | distinct Device;
+let ProcessDevices =
+    SecurityLogs
+    | where EventID == 4688
+    | distinct Device;
+FailedDevices
+| join kind=inner (ProcessDevices) on Device
+
+
+
+11. More useful KQL functions
+
+89. Count events using countif()
+SecurityLogs
+| summarize
+    HighSeverity = countif(Severity == "High"),
+    FailedEvents = countif(Status == "Failed"),
+    NetworkEvents = countif(Action == "NetworkConnection")
+
+
+
+90. Find median byte count
+SecurityLogs
+| summarize MedianBytes = percentile(Bytes, 50)
+
+
+
+91. Find variance and standard deviation of bytes
+SecurityLogs
+| summarize
+    ByteVariance = variance(Bytes),
+    ByteStdDev = stdev(Bytes)
+
+
+
+92. Round event times to the nearest minute bucket
+SecurityLogs
+| extend MinuteBucket = bin(TimeGenerated, 1m)
+| project TimeGenerated, MinuteBucket, User, Action
+
+
+
+93. Create a summary string
+SecurityLogs
+| extend Summary = strcat(
+    User, " | ", Action, " | ", Status, " | ", SrcIP)
+| project Summary
+
+
+
+94. Filter using a dynamic list
+let SuspiciousIPs = dynamic(["203.0.113.25", "198.51.100.40"]);
+SecurityLogs
+| where SrcIP in (SuspiciousIPs)
+
+
+
+95. Return only unique combinations of user and IP
+SecurityLogs
+| distinct User, SrcIP
+
+
+
+96. Find missing or empty values
+SecurityLogs
+| where isempty(User) or isempty(SrcIP) or isempty(Process)
+
+Your sample has no intentional empty values, so this should return no rows.
+
+
+97. Project a calculated severity priority
+SecurityLogs
+| extend Priority = case(
+    Severity == "High", 1,
+    Severity == "Medium", 2,
+    3
+)
+| order by Priority asc, TimeGenerated desc
+
+
+
+98. Find the percentage of events for each action
+let Total = toscalar(SecurityLogs | count);
+SecurityLogs
+| summarize Events = count() by Action
+| extend Percentage = round(100.0 * Events / Total, 2)
+| order by Percentage desc
+
+
+
+99. Calculate a cumulative event count
+SecurityLogs
+| sort by TimeGenerated asc
+| serialize
+| extend CumulativeEvents = row_number()
+| project TimeGenerated, User, Action, CumulativeEvents
+
+
+
+100. Build a mini SOC summary
+SecurityLogs
+| summarize
+    TotalEvents = count(),
+    FailedLogins = countif(EventID == 4625),
+    SuccessfulLogins = countif(EventID == 4624),
+    HighSeverity = countif(Severity == "High"),
+    UniqueUsers = dcount(User),
+    UniqueIPs = dcount(SrcIP),
+    TotalBytes = sum(Bytes)
+
+
+
+
+
+
+
+1. Beginner: where, project, take, sort, extend.
+
+
+
+2. Intermediate: summarize, countif, dcount, bin, arg_max.
+
+
+
+3. Advanced: join, union, let, parse, serialize.
+
+
+
+4. SOC hunting: failed-login patterns, suspicious processes, unusual network activity, and time-window detections.
+
+
+
+5. Sentinel implementation: work with real tables such as SecurityEvent, SigninLogs, DeviceProcessEvents, and CommonSecurityLog when the relevant data sources are connected and populated.
+
+
+
+Remember: your custom SecurityLogs table exists only within the query that defines it. In Microsoft Sentinel, real log tables must be ingested and available in your workspace. Also, SecurityEvent and SigninLogs use different schemas, so adapt each query to the actual columns available
